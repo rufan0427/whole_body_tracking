@@ -39,7 +39,8 @@ from isaaclab.utils.assets import ISAAC_NUCLEUS_DIR
 ##
 # Pre-defined configs
 ##
-from whole_body_tracking.robots.g1 import G1_CYLINDER_CFG
+# from whole_body_tracking.robots.g1 import G1_CYLINDER_CFG
+from whole_body_tracking.robots.smpl import SMPL_HUMANOID
 from whole_body_tracking.tasks.tracking.mdp import MotionLoader
 
 
@@ -58,7 +59,7 @@ class ReplayMotionsSceneCfg(InteractiveSceneCfg):
     )
 
     # articulation
-    robot: ArticulationCfg = G1_CYLINDER_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+    robot: ArticulationCfg = SMPL_HUMANOID.replace(prim_path="{ENV_REGEX_NS}/Robot")
 
 
 def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
@@ -67,35 +68,47 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
     # Define simulation stepping
     sim_dt = sim.get_physics_dt()
 
-    motion_file = args_cli.motion_file
+    # motion_file = args_cli.motion_file
 
-    motion = MotionLoader(
-        motion_file,
-        torch.tensor([0], dtype=torch.long, device=sim.device),
-        sim.device,
-    )
-    time_steps = torch.zeros(scene.num_envs, dtype=torch.long, device=sim.device)
+    # motion = MotionLoader(
+    #     motion_file,
+    #     torch.tensor([0], dtype=torch.long, device=sim.device),
+    #     sim.device,
+    # )
+    # time_steps = torch.zeros(scene.num_envs, dtype=torch.long, device=sim.device)
+    joint_names = robot.joint_names
+    hip_idxs = [i for i, n in enumerate(joint_names) if "Hip" in n]
+    hip_idxs = torch.tensor(hip_idxs, dtype=torch.long, device=sim.device)
 
-    # Simulation loop
+    t = 0.0
     while simulation_app.is_running():
-        time_steps += 1
-        reset_ids = time_steps >= motion.time_step_total
-        time_steps[reset_ids] = 0
+        # time_steps += 1
+        # reset_ids = time_steps >= motion.time_step_total
+        # time_steps[reset_ids] = 0
+
+        desired_pos = robot.data.default_joint_pos.clone().to(sim.device)
+        angle = 0.3 * torch.sin(torch.tensor(t, device=sim.device))
+        desired_pos[:, hip_idxs] = angle
+        desired_vel = torch.zeros_like(desired_pos)
+        robot.write_joint_state_to_sim(desired_pos, desired_vel)
 
         root_states = robot.data.default_root_state.clone()
-        root_states[:, :3] = motion.body_pos_w[time_steps][:, 0] + scene.env_origins[:, None, :]
-        root_states[:, 3:7] = motion.body_quat_w[time_steps][:, 0]
-        root_states[:, 7:10] = motion.body_lin_vel_w[time_steps][:, 0]
-        root_states[:, 10:] = motion.body_ang_vel_w[time_steps][:, 0]
+        # root_states[:, :3] = motion.body_pos_w[time_steps][:, 0] + scene.env_origins[:, None, :]
+        # root_states[:, 3:7] = motion.body_quat_w[time_steps][:, 0]
+        # root_states[:, 7:10] = motion.body_lin_vel_w[time_steps][:, 0]
+        # root_states[:, 10:] = motion.body_ang_vel_w[time_steps][:, 0]
 
         robot.write_root_state_to_sim(root_states)
-        robot.write_joint_state_to_sim(motion.joint_pos[time_steps], motion.joint_vel[time_steps])
+        # robot.write_joint_state_to_sim(motion.joint_pos[time_steps], motion.joint_vel[time_steps])
+
         scene.write_data_to_sim()
         sim.render()  # We don't want physic (sim.step())
         scene.update(sim_dt)
 
         pos_lookat = root_states[0, :3].cpu().numpy()
         sim.set_camera_view(pos_lookat + np.array([2.0, 2.0, 0.5]), pos_lookat)
+
+        t += float(sim_dt)
 
 
 def main():

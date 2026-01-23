@@ -29,13 +29,30 @@ SMPL_HUMANOID = ArticulationCfg(
     ),
     init_state=ArticulationCfg.InitialStateCfg(
         pos=(0.0, 0.0, 0.95),
+        rot=(1.0, 0.0, 0.0, 0.0),
         joint_pos={".*": 0.0},
+        joint_vel={".*": 0.0},
     ),
     actuators={
-        "body": ImplicitActuatorCfg(
-            joint_names_expr=[".*"],
-            stiffness=None,
-            damping=None,
+        "legs": ImplicitActuatorCfg(
+        joint_names_expr=["L_Hip_.*", "R_Hip_.*", "L_Knee_.*", "R_Knee_.*", "L_Ankle_.*", "R_Ankle_.*", "L_Toe_.*", "R_Toe_.*"],
+        stiffness=800.0, damping=80.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0,
+        ),
+        "torso": ImplicitActuatorCfg(
+            joint_names_expr=["Torso_.*", "Spine_.*", "Chest_.*"],
+            stiffness=1000.0, damping=100.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0,
+        ),
+        "arms": ImplicitActuatorCfg(
+            joint_names_expr=["L_Thorax_.*","R_Thorax_.*","L_Shoulder_.*","R_Shoulder_.*","L_Elbow_.*","R_Elbow_.*","L_Wrist_.*","R_Wrist_.*"],
+            stiffness=500.0, damping=50.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0,
+        ),
+        "fingers": ImplicitActuatorCfg(
+            joint_names_expr=[".*Index.*",".*Middle.*",".*Ring.*",".*Pinky.*",".*Thumb.*"],
+            stiffness=100.0, damping=10.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0,
+        ),
+        "head": ImplicitActuatorCfg(
+            joint_names_expr=["Neck_.*","Head_.*"],
+            stiffness=500.0, damping=50.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0,
         ),
     },
 )

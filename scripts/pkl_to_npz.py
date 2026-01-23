@@ -110,10 +110,10 @@ class MotionLoader:
         motion = motion[key]
         # dict_keys(['root_trans_offset', 'pose_aa', 'dof', 'root_rot', 'smpl_joints', 'fps'])
         # motion = motion.to(torch.float32).to(self.device)
-        self.motion_base_poss_input = torch.from_numpy(motion["root_trans_offset"], dtype=torch.float32).to(self.device)
-        self.motion_base_rots_input = torch.from_numpy(motion["root_rot"], dtype=torch.float32).to(self.device)
+        self.motion_base_poss_input = torch.from_numpy(motion["root_trans_offset"].astype(np.float32)).to(self.device)
+        self.motion_base_rots_input = torch.from_numpy(motion["root_rot"].astype(np.float32)).to(self.device)
         self.motion_base_rots_input = self.motion_base_rots_input[:, [3, 0, 1, 2]]  # convert to wxyz
-        self.motion_dof_poss_input = torch.from_numpy(motion["dof"], dtype=torch.float32).to(self.device)
+        self.motion_dof_poss_input = torch.from_numpy(motion["dof"].astype(np.float32)).to(self.device)
 
         self.input_frames = self.motion_base_poss_input.shape[0]
         self.duration = (self.input_frames - 1) * self.input_dt

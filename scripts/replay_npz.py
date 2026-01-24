@@ -102,7 +102,8 @@ def run_simulator(sim: sim_utils.SimulationContext, scene: InteractiveScene):
         # robot.write_joint_state_to_sim(motion.joint_pos[time_steps], motion.joint_vel[time_steps])
 
         scene.write_data_to_sim()
-        sim.render()  # We don't want physic (sim.step())
+        sim.render()  # We don't want physic (sim.step())   -> directly replace this line with sim.step() without other changes can work.
+        #physic step enable to calculate moment of motor etc.
         scene.update(sim_dt)
 
         pos_lookat = root_states[0, :3].cpu().numpy()

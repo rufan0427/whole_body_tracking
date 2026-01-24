@@ -10,8 +10,8 @@ from whole_body_tracking.assets import ASSET_DIR
 
 SMPL_HUMANOID = ArticulationCfg(
     prim_path="{ENV_REGEX_NS}/Robot",
-    spawn=sim_utils.UsdFileCfg(
-        usd_path=f"{ASSET_DIR}/smpl/smpl_humanoid.usda",
+    spawn=sim_utils.MjcfFileCfg(
+        asset_path=f"{ASSET_DIR}/smpl/smpl_humanoid.xml",
         activate_contact_sensors=True,
         rigid_props=sim_utils.RigidBodyPropertiesCfg(
             disable_gravity=None,
@@ -25,8 +25,10 @@ SMPL_HUMANOID = ArticulationCfg(
             sleep_threshold=0.005,
             stabilization_threshold=0.001,
         ),
-        copy_from_source=True,
+        fix_base=False,
+        copy_from_source=False,
     ),
+    articulation_root_prim_path="/Pelvis/Pelvis",
     init_state=ArticulationCfg.InitialStateCfg(
         pos=(0.0, 0.0, 0.95),
         rot=(1.0, 0.0, 0.0, 0.0),
@@ -35,32 +37,24 @@ SMPL_HUMANOID = ArticulationCfg(
     ),
     actuators={
         "legs": ImplicitActuatorCfg(
-            joint_names_expr=["L_Hip_.*", "R_Hip_.*", "L_Knee_.*", "R_Knee_.*", "L_Ankle_.*", "R_Ankle_.*"],
-            stiffness=800.0, damping=80.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0, armature=0.02,
+        joint_names_expr=["L_Hip_.*", "R_Hip_.*", "L_Knee_.*", "R_Knee_.*", "L_Ankle_.*", "R_Ankle_.*", "L_Toe_.*", "R_Toe_.*"],
+        stiffness=800.0, damping=80.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0,
         ),
-        "toes": ImplicitActuatorCfg(
-            joint_names_expr=["L_Toe_.*", "R_Toe_.*"],
-            stiffness=500.0, damping=50.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0, armature=0.02,
+        "torso": ImplicitActuatorCfg(
+            joint_names_expr=["Torso_.*", "Spine_.*", "Chest_.*"],
+            stiffness=1000.0, damping=100.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0,
         ),
-        "spine": ImplicitActuatorCfg(
-            joint_names_expr=["Spine_.*"],
-            stiffness=1000.0, damping=100.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0, armature=0.02,
-        ),
-        "head": ImplicitActuatorCfg(
-            joint_names_expr=["Neck_.*", "Head_.*"],
-            stiffness=500.0, damping=50.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0, armature=0.02,
-        ),
-        "shoulders": ImplicitActuatorCfg(
-            joint_names_expr=["L_Thorax_.*", "R_Thorax_.*", "L_Shoulder_.*", "R_Shoulder_.*", "L_Elbow_.*", "R_Elbow_.*"],
-            stiffness=500.0, damping=50.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0, armature=0.02,
-        ),
-        "wrists": ImplicitActuatorCfg(
-            joint_names_expr=["L_Wrist_.*", "R_Wrist_.*"],
-            stiffness=300.0, damping=30.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0, armature=0.02,
+        "arms": ImplicitActuatorCfg(
+            joint_names_expr=["L_Thorax_.*","R_Thorax_.*","L_Shoulder_.*","R_Shoulder_.*","L_Elbow_.*","R_Elbow_.*","L_Wrist_.*","R_Wrist_.*"],
+            stiffness=500.0, damping=50.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0,
         ),
         "fingers": ImplicitActuatorCfg(
-            joint_names_expr=[".*Index.*", ".*Middle.*", ".*Ring.*", ".*Pinky.*", ".*Thumb.*"],
-            stiffness=100.0, damping=10.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0, armature=0.02,
+            joint_names_expr=[".*Index.*",".*Middle.*",".*Ring.*",".*Pinky.*",".*Thumb.*"],
+            stiffness=100.0, damping=10.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0,
+        ),
+        "head": ImplicitActuatorCfg(
+            joint_names_expr=["Neck_.*","Head_.*"],
+            stiffness=500.0, damping=50.0, effort_limit_sim=3000.0, velocity_limit_sim=50.0,
         ),
     },
 )

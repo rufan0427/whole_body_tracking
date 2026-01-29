@@ -21,6 +21,8 @@
 **/runs/*
 **/logs/*
 **/recordings/*
+**/data/*
+**/datasets/*
 **/output/*
 **/outputs/*
 **/videos/*
@@ -39,6 +41,7 @@ _build
 *.pkl
 *.zarr
 *.npz
+*.pt
 
 **/assets/
 artifacts/
